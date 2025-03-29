@@ -1,25 +1,27 @@
 # 開発環境のセットアップ
 
-このドキュメントでは、Ollama MCP Client & Agent の開発環境をセットアップする手順を説明します。
+このドキュメントでは、FableMaze の開発環境をセットアップする手順を説明します。
 
 ## 前提条件
 
 開発を始める前に、以下のソフトウェアがインストールされていることを確認してください：
 
-- Python 3.11以上
+- Python 3.10以上
 - Poetry（Python依存関係マネージャ）
 - Git
+- Node.js 16以上（HTMLプレビュー機能のため）
 - 必要に応じて：
   - OpenAI API キー（OpenAIモデルを使用する場合）
   - その他のAIモデルプロバイダーのAPI キー
 
 ```mermaid
 graph TD
-    A[Python 3.11+] -->|必須| D[開発環境]
+    A[Python 3.10+] -->|必須| D[開発環境]
     B[Poetry] -->|必須| D
     C[Git] -->|必須| D
-    E[API Keys] -->|オプション| D
-    F[エディタ/IDE] -->|推奨| D
+    E[Node.js 16+] -->|必須| D
+    F[API Keys] -->|オプション| D
+    G[エディタ/IDE] -->|推奨| D
     
     style D fill:#d4f1f9,stroke:#0077b6
 ```
@@ -29,8 +31,8 @@ graph TD
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/yourusername/ollama-mcp-client.git
-cd ollama-mcp-client
+git clone https://github.com/yourusername/fablemaze.git
+cd fablemaze
 ```
 
 ### 2. 開発用仮想環境の作成
@@ -42,8 +44,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 # 開発用依存関係を含むすべての依存関係をインストール
 poetry install --with dev
 
-# Agnoと関連パッケージをインストール
-poetry add agno mcp gradio loguru
+# フロントエンド依存関係のインストール
+npm install
 
 # 仮想環境を有効化
 poetry shell
@@ -58,23 +60,31 @@ poetry shell
 touch .env
 
 # 以下の内容を追加
-AGNO_TELEMETRY=false  # テレメトリを無効化する場合
 OPENAI_API_KEY=your_key_here  # OpenAIモデルを使用する場合
-# その他のAPI キー
+DOKUWIKI_URL=http://localhost/dokuwiki  # ローカルDokuWikiのURL
+DOKUWIKI_USERNAME=admin  # DokuWikiの管理者ユーザー名
+DOKUWIKI_PASSWORD=password  # DokuWikiの管理者パスワード
+DEBUG=true  # デバッグモードを有効化
 ```
 
-### 4. 開発用サーバーのセットアップ
+### 4. DokuWikiのセットアップ
 
-テスト用MCPサーバーをセットアップします：
+Wiki統合機能をテストするには、DokuWikiのローカルインスタンスが必要です：
+
+#### 方法1: Docker
 
 ```bash
-# 例：サンプルサーバーをクローン
-git clone https://github.com/example/mcp-server-example.git
-cd mcp-server-example
+# DokuWikiコンテナを実行
+docker run -d --name dokuwiki -p 80:80 linuxserver/dokuwiki
 
-# 依存関係をインストール
-poetry install
+# コンテナ起動後、http://localhost/dokuwiki にアクセスして初期設定を行います
 ```
+
+#### 方法2: 手動インストール
+
+1. [DokuWiki公式サイト](https://www.dokuwiki.org/dokuwiki)からパッケージをダウンロード
+2. お使いのウェブサーバー（Apache, Nginx等）にDokuWikiを設置
+3. インストールウィザードに従ってセットアップ
 
 ### 5. プレコミットフックの設定
 
@@ -93,37 +103,63 @@ pre-commit install
 プロジェクトのフォルダ構成は以下の通りです：
 
 ```
-ollama_mcp/
+fablemaze/
 ├── __init__.py
-├── agno_integration.py      # Agno統合モジュール
-├── agno_multimodal.py      # マルチモーダル機能
-├── debug.py                # デバッグモジュール
-├── tools/                  # ツール定義と実行
+├── controller.py       # メインコントローラー
+├── story_engine/       # ストーリー生成機能
 │   ├── __init__.py
-│   ├── base.py
-│   ├── registry.py
-│   └── builtin.py
-├── models/                 # モデル管理
+│   ├── generator.py
+│   ├── prompt_manager.py
+│   └── context.py
+├── wiki_integration/   # Wiki統合機能
 │   ├── __init__.py
-│   ├── base.py
-│   └── utils.py
-├── memory/                 # メモリ管理
+│   ├── connector.py
+│   ├── entity_extractor.py
+│   └── formatter.py
+├── html_engine/        # HTML生成機能
 │   ├── __init__.py
-│   ├── session.py
-│   └── state.py
-├── knowledge/             # 知識ベース
+│   ├── template_manager.py
+│   ├── renderer.py
+│   └── assets.py
+├── story_graph/        # ストーリーグラフ管理
 │   ├── __init__.py
-│   ├── vector_store.py
-│   └── document.py
-├── ui/                    # Gradio UI
+│   ├── graph.py
+│   ├── node.py
+│   └── analysis.py
+├── ui/                 # Gradio UI
 │   ├── __init__.py
 │   ├── app.py
 │   ├── components.py
 │   └── pages/
-└── utils/                 # ユーティリティ
+└── utils/              # ユーティリティ
     ├── __init__.py
-    ├── async_utils.py
-    └── json_utils.py
+    ├── config.py
+    └── logger.py
+```
+
+## テンプレートとプロンプトの構成
+
+テンプレートとプロンプトは以下のディレクトリ構造で管理されます：
+
+```
+fablemaze/
+├── templates/            # HTMLテンプレート
+│   ├── base.html         # 基本テンプレート
+│   ├── fantasy/          # ファンタジージャンル
+│   │   ├── config.json   # 設定
+│   │   ├── base.html     # ジャンル固有テンプレート
+│   │   └── styles.css    # スタイルシート
+│   ├── scifi/            # SFジャンル
+│   └── mystery/          # ミステリージャンル
+└── prompts/              # プロンプトテンプレート
+    ├── base/             # 基本プロンプト
+    │   ├── setting.txt   # 設定プロンプト
+    │   ├── chapter.txt   # チャプタープロンプト
+    │   ├── choice.txt    # 選択肢プロンプト
+    │   └── ending.txt    # エンディングプロンプト
+    ├── fantasy/          # ファンタジージャンル
+    ├── scifi/            # SFジャンル
+    └── mystery/          # ミステリージャンル
 ```
 
 ## 開発ワークフロー
@@ -155,7 +191,7 @@ ollama_mcp/
    poetry run test
    
    # カバレッジ付きでテスト実行
-   poetry run pytest --cov=ollama_mcp
+   poetry run pytest --cov=fablemaze
    ```
 
 ### 2. アプリケーションの実行
@@ -164,10 +200,10 @@ ollama_mcp/
 
 ```bash
 # メインアプリケーションを実行
-poetry run app
+poetry run fablemaze
 
-# または特定の例を実行
-poetry run python examples/basic_agent.py
+# または特定のオプションで実行
+poetry run fablemaze --model gpt-4 --template fantasy --debug
 ```
 
 ## デバッグ
@@ -181,7 +217,7 @@ VSCode を使用している場合は、次の `.vscode/launch.json` 設定を�
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run App",
+            "name": "Run FableMaze",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/app.py",
@@ -189,7 +225,7 @@ VSCode を使用している場合は、次の `.vscode/launch.json` 設定を�
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
-                "AGNO_TELEMETRY": "false"
+                "DEBUG": "true"
             }
         },
         {
@@ -201,7 +237,7 @@ VSCode を使用している場合は、次の `.vscode/launch.json` 設定を�
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
-                "AGNO_TELEMETRY": "false"
+                "DEBUG": "true"
             }
         }
     ]
@@ -214,75 +250,68 @@ VSCode を使用している場合は、次の `.vscode/launch.json` 設定を�
 
 ```mermaid
 flowchart TD
-    A[問題が発生] --> B{MCPサーバーが実行中?}
-    B -->|いいえ| C[MCPサーバーを起動する]
-    B -->|はい| D{環境変数が設定済み?}
-    D -->|いいえ| E[.env ファイルを確認する]
-    D -->|はい| F{依存関係の問題?}
-    F -->|はい| G[依存関係を再インストールする]
-    F -->|いいえ| H{ログで詳細を確認}
+    A[問題が発生] --> B{HTTPエラー?}
+    B -->|はい| C[DokuWikiの状態を確認]
+    B -->|いいえ| D{APIエラー?}
+    D -->|はい| E[APIキーと割り当てを確認]
+    D -->|いいえ| F{テンプレートエラー?}
+    F -->|はい| G[テンプレートパスを確認]
+    F -->|いいえ| H{ログでエラーを確認}
     
-    C --> I[再テスト]
-    E --> I
-    G --> I
-    H --> J[Issueを開く]
+    C --> I[DokuWikiサーバー起動確認]
+    E --> J[.envファイルを確認]
+    G --> K[テンプレートファイル存在確認]
+    H --> L[デバッグログを分析]
+    
+    I --> M[再テスト]
+    J --> M
+    K --> M
+    L --> N[Issueを開く]
     
     style A fill:#ffcdd2,stroke:#c62828
-    style I fill:#c8e6c9,stroke:#2e7d32
-    style J fill:#bbdefb,stroke:#1976d2
+    style M fill:#c8e6c9,stroke:#2e7d32
+    style N fill:#bbdefb,stroke:#1976d2
 ```
 
-#### MCPサーバーの問題
+#### DokuWiki連携問題
 
-**症状**: `Connection refused` または `MCP server not responding` エラーが発生する
+**症状**: `Connection refused` または `DokuWiki server not responding` エラーが発生する
 
 **解決策**:
-1. サーバーが実行中か確認
-2. サーバーのパスが正しいか確認
-3. サーバーのログでエラーを確認
+1. DokuWikiサーバーが実行中か確認
+2. URLが正しいか確認
+3. 認証情報が正しいか確認
 
-#### 依存関係の問題
+#### API制限の問題
 
-**症状**: `ImportError` または `ModuleNotFoundError` が発生する
+**症状**: `Rate limit exceeded` または `API quota exceeded` エラーが発生する
 
 **解決策**:
 ```bash
-# 仮想環境が有効化されているか確認
-# 依存関係を再インストール
-poetry install
+# テスト用にモックAPIモードを有効化
+export USE_MOCK_API=true
 
-# Agnoと関連パッケージを再インストール
-poetry add agno mcp gradio loguru
+# または開発中は低頻度/低コストのモデルを使用
+poetry run fablemaze --model gpt-3.5-turbo
 ```
 
-#### Agno関連の問題
+#### テンプレート関連の問題
 
-**症状**: Agnoエージェントの初期化や実行でエラーが発生する
+**症状**: `Template not found` または `Jinja2 rendering error` が発生する
 
 **解決策**:
-1. 環境変数の確認：
+1. テンプレートパスが正しいか確認
+2. 構文エラーをチェック
+3. デバッグモードでエラー詳細を確認：
    ```bash
-   # .envファイルの内容を確認
-   cat .env
-   
-   # 必要な環境変数が設定されているか確認
-   echo $AGNO_TELEMETRY
-   echo $OPENAI_API_KEY
-   ```
-
-2. Agnoのバージョン確認：
-   ```bash
-   # インストールされているバージョンを確認
-   poetry show agno
-   
-   # 最新バージョンにアップデート
-   poetry update agno
+   poetry run fablemaze --debug debug
    ```
 
 ## 参考リンク
 
-- [Agno公式ドキュメント](https://docs.agno.com)
-- [MCPプロトコル仕様](https://mcp-protocol.org)
+- [Jinja2ドキュメント](https://jinja.palletsprojects.com/)
+- [DokuWiki APIドキュメント](https://www.dokuwiki.org/devel:xmlrpc)
 - [Gradioドキュメント](https://gradio.app/docs)
+- [NetworkXドキュメント](https://networkx.org/documentation/stable/)
 
 質問がある場合は、Issueトラッカーで質問するか、メインリポジトリのDiscussionsセクションを利用してください。

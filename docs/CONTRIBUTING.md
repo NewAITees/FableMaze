@@ -1,15 +1,15 @@
 # コントリビューションガイド
 
-Ollama MCP Client & Agent プロジェクトへの貢献に興味をお持ちいただき、ありがとうございます。このドキュメントでは、効率的に貢献するためのガイドラインを提供します。
+FableMaze プロジェクトへの貢献に興味をお持ちいただき、ありがとうございます。このドキュメントでは、効率的に貢献するためのガイドラインを提供します。
 
 ## コード規約
 
 ### 命名規則
 
-- **クラス名**: `PascalCase` (例: `MCPClient`, `ToolExecutor`)
-- **変数・関数名**: `snake_case` (例: `connect_to_server`, `tool_result`)
-- **定数**: `UPPER_SNAKE_CASE` (例: `MAX_RETRY_COUNT`, `DEFAULT_TIMEOUT`)
-- **プライベートメンバー**: アンダースコア接頭辞 (例: `_internal_state`, `_process_response`)
+- **クラス名**: `PascalCase` (例: `StoryEngine`, `WikiConnector`)
+- **変数・関数名**: `snake_case` (例: `generate_story`, `extract_entities`)
+- **定数**: `UPPER_SNAKE_CASE` (例: `MAX_CHOICES`, `DEFAULT_TEMPLATE`)
+- **プライベートメンバー**: アンダースコア接頭辞 (例: `_internal_state`, `_process_text`)
 - **タイプヒント**: すべての関数とメソッドにタイプヒントを付ける
 
 ### コードスタイル
@@ -44,17 +44,17 @@ gitGraph
     branch develop
     checkout develop
     commit
-    branch feature/new-tool-support
-    checkout feature/new-tool-support
+    branch feature/new-template
+    checkout feature/new-template
     commit
     commit
     checkout develop
-    merge feature/new-tool-support
-    branch fix/connection-issue
-    checkout fix/connection-issue
+    merge feature/new-template
+    branch fix/wiki-sync-issue
+    checkout fix/wiki-sync-issue
     commit
     checkout develop
-    merge fix/connection-issue
+    merge fix/wiki-sync-issue
     checkout main
     merge develop tag: "v1.0.0"
 ```
@@ -108,13 +108,22 @@ flowchart TD
 
 ## 変更の種類
 
+- [ ] ストーリー生成機能の改善
+- [ ] Wiki統合の強化
+- [ ] HTML生成の拡張
+- [ ] UI/UXの改善
 - [ ] バグ修正
-- [ ] 新機能
-- [ ] 既存機能の変更
-- [ ] コードスタイルの更新
-- [ ] リファクタリング
 - [ ] ドキュメントの更新
 - [ ] その他（詳細を記載）
+
+## 影響範囲
+
+- [ ] ストーリーエンジン
+- [ ] Wiki統合
+- [ ] HTML生成
+- [ ] ストーリーグラフ
+- [ ] UI
+- [ ] ドキュメント
 
 ## チェックリスト
 
@@ -166,6 +175,8 @@ flowchart TD
 - **refactor**: バグ修正でも機能追加でもないコード変更
 - **test**: テスト追加・修正
 - **chore**: ビルドプロセスやドキュメント生成の変更
+- **story**: ストーリーテンプレートやプロンプトの変更
+- **wiki**: Wiki統合関連の変更
 
 ## コミュニケーション
 
@@ -198,3 +209,72 @@ flowchart TD
    ```bash
    poetry run test
    ```
+
+## ストーリーテンプレートの作成
+
+FableMazeでは、新しいストーリーテンプレートを積極的に募集しています。テンプレートを作成する際は以下のガイドラインに従ってください：
+
+1. **テンプレート構造**:
+   - `templates/[genre]/` ディレクトリに配置
+   - `config.json` にメタデータを定義
+   - `prompt_*.txt` ファイルでプロンプトを定義
+   - `base.html` でHTMLテンプレートを定義
+
+2. **プロンプト設計**:
+   - 設定プロンプト: 世界観とキャラクターの設定
+   - チャプタープロンプト: 各チャプターの構造
+   - 分岐プロンプト: 選択肢生成のガイドライン
+   - エンディングプロンプト: 結末の設計
+
+3. **Wiki統合**:
+   - エンティティタイプの定義
+   - 抽出ルールの設計
+   - テンプレートの作成
+
+4. **テスト要件**:
+   - サンプルストーリーの生成
+   - 一貫性チェック
+   - 可読性評価
+
+## Wiki統合のガイドライン
+
+Wiki統合機能を拡張する際のガイドライン:
+
+1. **エンティティ抽出**:
+   - 固有名詞の識別方法
+   - 関係性の抽出方法
+   - 重要度の計算方法
+
+2. **ページ生成**:
+   - ページ構造のテンプレート
+   - 自動生成コンテンツと手動編集の区別
+   - メタデータの管理方法
+
+3. **クロスリンク**:
+   - リンク生成のルール
+   - ストーリーからWikiへの参照方法
+   - Wikiからストーリーへの参照方法
+
+4. **一貫性維持**:
+   - 既存情報との矛盾検出
+   - 更新戦略
+   - バージョン管理
+
+## HTML生成の拡張
+
+HTMLテンプレートを拡張または改善する際のガイドライン:
+
+1. **テンプレート作成**:
+   - Jinja2テンプレート構文の使用
+   - モジュール化されたコンポーネント
+   - レスポンシブデザインの原則
+
+2. **CSSスタイル**:
+   - テーマの命名規則
+   - 変数の使用
+   - メディアクエリの標準化
+
+3. **インタラクティブ要素**:
+   - アクセシビリティの確保
+   - モバイル対応の考慮
+   - アニメーションの適切な使用
