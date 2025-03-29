@@ -1,10 +1,15 @@
 """
 Gradioを使用したチャットインターフェースの実装
+
+このモジュールは、FableMazeのチャットインターフェースコンポーネントを提供します。
 """
 import gradio as gr
-from loguru import logger
 from agno.agent import Agent
 from agno.models.ollama import Ollama
+
+from fablemaze.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 class ChatUI:
     def __init__(self):

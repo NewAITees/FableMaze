@@ -1,5 +1,9 @@
 """
+Agnoベースの統合クライアント
 
+このモジュールは、Agnoを使用してAIモデルとの通信を管理します。
+MCPサーバーとの接続、Ollamaモデルとの直接/間接通信、
+マルチモーダル処理をサポートします。
 """
 import asyncio
 import os
@@ -14,7 +18,9 @@ from agno.tools.mcp import MCPTools
 from agno.media import Image as AgnoImage
 from mcp import StdioServerParameters
 
-from ollama_mcp.debug_module import AgnoMCPDebugger
+from fablemaze.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 class AgnoClient:
     """

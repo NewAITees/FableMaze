@@ -1,6 +1,7 @@
 """
 メインアプリケーションのエントリーポイント
 
+このモジュールは、FableMazeのGradio UIインターフェースを提供します。
 """
 import argparse
 import asyncio
@@ -15,13 +16,15 @@ from pathlib import Path
 import gradio as gr
 import ollama
 from PIL import Image
-from loguru import logger
 
-from ollama_mcp.agno_client import AgnoClient  # 新しい統合クライアント
+from fablemaze.story_engine.ai_integration.agno_client import AgnoClient
+from fablemaze.utils.logger import get_logger
 
-class OllamaMCPApp:
+logger = get_logger(__name__)
+
+class FableMazeApp:
     """
-    Ollama MCP Client & Agent のメインアプリケーション
+    FableMazeのメインアプリケーション
     
     主な責務:
     - Gradio UIの提供
@@ -671,7 +674,7 @@ def main():
     
     args = parser.parse_args()
     
-    app = OllamaMCPApp(
+    app = FableMazeApp(
         model_name=args.model,
         debug_level=args.debug,
         direct_mode=args.direct
