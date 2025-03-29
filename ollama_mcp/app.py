@@ -1,6 +1,6 @@
 """
 メインアプリケーションのエントリーポイント
-Gradio UIとAgno統合クライアント機能を含む
+
 """
 import argparse
 import asyncio
@@ -18,7 +18,6 @@ from PIL import Image
 from loguru import logger
 
 from ollama_mcp.agno_client import AgnoClient  # 新しい統合クライアント
-from ollama_mcp.debug_module import AgnoMCPDebugger
 
 class OllamaMCPApp:
     """

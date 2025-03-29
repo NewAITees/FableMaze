@@ -1,7 +1,7 @@
 """
-Ollama MCP Client & Agent
+FableMaze
 
-MCPサーバーと連携するOllamaベースのクライアント・エージェントフレームワーク
+
 """
 
 __version__ = "0.1.0" 
